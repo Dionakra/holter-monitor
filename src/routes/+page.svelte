@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DatParser, { type Signal } from "$lib/DatParser";
+	import DatParser, { type Metadata, type Signal } from "$lib/DatParser";
 
 	// ECharts stuff
 	import { echarts } from "../lib/echarts";
@@ -70,13 +70,11 @@
 
 			// We calculate the values of the xAxis based on the base date and sampleRate
 			const xAxis = [];
-			const msPerSample = 1 / metadata.sampleRate;
+			const msPerSample = 1000 / metadata.sampleRate;
 			for (let i = 0; i < metadata.numSamples; i++) {
 				// For each sample, calculate which time did it happen
 				const sampleDate: Date = new Date(metadata.initialDate);
-				sampleDate.setTime(
-					sampleDate.getTime() + metadata.sampleRate * i,
-				);
+				sampleDate.setTime(sampleDate.getTime() + msPerSample * i);
 
 				// And format it in a nice way
 				xAxis[i] =
@@ -119,9 +117,11 @@
 		samples: number[],
 		signal: Signal,
 		i: number,
+		metadata: Metadata,
 	) {
-		xAxis = xAxis.slice(0, 500000);
-		samples = samples.slice(0, 500000);
+		// Plotting 30 minutes
+		xAxis = xAxis.slice(0, metadata.sampleRate * 30 * 60);
+		samples = samples.slice(0, metadata.sampleRate * 30 * 60);
 
 		return {
 			tooltip: {
